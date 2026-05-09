@@ -1,0 +1,475 @@
+************USER*****************************
+CREATE DATABASE ChatDB;
+GO
+
+USE ChatDB;
+GO
+
+-- Create the Users table
+CREATE TABLE Users (
+    UserID INT PRIMARY KEY IDENTITY(1,1),
+    Username NVARCHAR(50) NOT NULL UNIQUE,
+    Email NVARCHAR(100) NOT NULL,
+    PasswordHash NVARCHAR(255) NOT NULL,
+    CreatedAt DATETIME DEFAULT GETDATE()
+);
+GO
+
+-- Create UserLogs table
+CREATE TABLE UserLogs (
+    LogID INT PRIMARY KEY IDENTITY(1,1),
+    Username NVARCHAR(50),
+    Action NVARCHAR(100),
+    Timestamp DATETIME DEFAULT GETDATE()
+);
+GO
+
+-- Create stored procedure
+CREATE PROCEDURE RegisterUser
+    @Username NVARCHAR(50),
+    @Email NVARCHAR(100),
+    @PasswordHash NVARCHAR(255)
+AS
+BEGIN
+    INSERT INTO Users (Username, Email, PasswordHash)
+    VALUES (@Username, @Email, @PasswordHash);
+END;
+GO
+
+-- Create trigger
+CREATE TRIGGER trg_LogNewUser
+ON Users
+AFTER INSERT
+AS
+BEGIN
+    INSERT INTO UserLogs (Username, Action)
+    SELECT Username, 'New user registered' FROM inserted;
+END;
+GO
+
+*****************************************************************************************************
+
+MESSAGES TABLE**********************************************************************************
+USE ChatDB;
+GO
+
+-- 1. Create the Messages table
+CREATE TABLE Messages (
+    MessageID INT PRIMARY KEY IDENTITY(1,1),
+    SenderID INT FOREIGN KEY REFERENCES Users(UserID),
+    ReceiverID INT FOREIGN KEY REFERENCES Users(UserID),
+    MessageText NVARCHAR(MAX) NOT NULL,
+    Status NVARCHAR(20) DEFAULT 'sent', -- values: sent, delivered, seen
+    SentAt DATETIME DEFAULT GETDATE()
+);
+GO
+
+-- 2. Create MessageLogs table to track message events
+CREATE TABLE MessageLogs (
+    LogID INT PRIMARY KEY IDENTITY(1,1),
+    SenderID INT,
+    ReceiverID INT,
+    Action NVARCHAR(100),
+    Timestamp DATETIME DEFAULT GETDATE()
+);
+GO
+
+-- 3. Create stored procedure to send a message
+CREATE PROCEDURE SendMessage
+    @SenderID INT,
+    @ReceiverID INT,
+    @MessageText NVARCHAR(MAX)
+AS
+BEGIN
+    INSERT INTO Messages (SenderID, ReceiverID, MessageText)
+    VALUES (@SenderID, @ReceiverID, @MessageText);
+END;
+GO
+
+-- 4. Create trigger to log sent messages
+CREATE TRIGGER trg_LogNewMessage
+ON Messages
+AFTER INSERT
+AS
+BEGIN
+    INSERT INTO MessageLogs (SenderID, ReceiverID, Action)
+    SELECT SenderID, ReceiverID, 'Message Sent' FROM inserted;
+END;
+GO
+
+*************************************************************************************
+FRIENDS********************************************************************************
+
+
+
+CREATE TABLE Friends (
+    FriendID INT PRIMARY KEY IDENTITY(1,1),
+    UserID INT FOREIGN KEY REFERENCES Users(UserID),
+    FriendUserID INT FOREIGN KEY REFERENCES Users(UserID),
+    Since DATETIME DEFAULT GETDATE(),
+    CONSTRAINT UQ_Friends UNIQUE (UserID, FriendUserID)
+);
+GO
+
+CREATE TABLE FriendLogs (
+    LogID INT PRIMARY KEY IDENTITY(1,1),
+    UserID INT,
+    FriendUserID INT,
+    Action NVARCHAR(100),
+    Timestamp DATETIME DEFAULT GETDATE()
+);
+GO
+
+CREATE PROCEDURE AddFriend
+    @UserID INT,
+    @FriendUserID INT
+AS
+BEGIN
+    INSERT INTO Friends (UserID, FriendUserID)
+    VALUES (@UserID, @FriendUserID);
+END;
+GO
+
+CREATE TRIGGER trg_LogNewFriend
+ON Friends
+AFTER INSERT
+AS
+BEGIN
+    INSERT INTO FriendLogs (UserID, FriendUserID, Action)
+    SELECT UserID, FriendUserID, 'New Friend Added' FROM inserted;
+END;
+GO
+
+********************************************************************************************************
+********************************FRIENDS REQUESTS*****************************************************8
+
+CREATE TABLE FriendRequests (
+    RequestID INT PRIMARY KEY IDENTITY(1,1),
+    SenderID INT FOREIGN KEY REFERENCES Users(UserID),
+    ReceiverID INT FOREIGN KEY REFERENCES Users(UserID),
+    RequestDate DATETIME DEFAULT GETDATE(),
+    Status NVARCHAR(20) DEFAULT 'pending' -- pending, accepted, rejected
+);
+GO
+
+CREATE TABLE FriendRequestLogs (
+    LogID INT PRIMARY KEY IDENTITY(1,1),
+    SenderID INT,
+    ReceiverID INT,
+    Action NVARCHAR(100),
+    Timestamp DATETIME DEFAULT GETDATE()
+);
+GO
+
+CREATE PROCEDURE SendFriendRequest
+    @SenderID INT,
+    @ReceiverID INT
+AS
+BEGIN
+    INSERT INTO FriendRequests (SenderID, ReceiverID)
+    VALUES (@SenderID, @ReceiverID);
+END;
+GO
+
+CREATE TRIGGER trg_LogFriendRequest
+ON FriendRequests
+AFTER INSERT
+AS
+BEGIN
+    INSERT INTO FriendRequestLogs (SenderID, ReceiverID, Action)
+    SELECT SenderID, ReceiverID, 'Friend Request Sent' FROM inserted;
+END;
+GO
+
+****************************************************************************************************************
+GROUPS TABLE:
+CREATE TABLE Groups (
+    GroupID INT PRIMARY KEY IDENTITY(1,1),
+    GroupName NVARCHAR(100) NOT NULL UNIQUE,
+    Description NVARCHAR(255),
+    CreatedBy INT FOREIGN KEY REFERENCES Users(UserID),
+    CreatedAt DATETIME DEFAULT GETDATE()
+);
+GO
+
+CREATE TABLE GroupLogs (
+    LogID INT PRIMARY KEY IDENTITY(1,1),
+    GroupID INT,
+    Action NVARCHAR(100),
+    Timestamp DATETIME DEFAULT GETDATE()
+);
+GO
+
+CREATE PROCEDURE CreateGroup
+    @GroupName NVARCHAR(100),
+    @Description NVARCHAR(255),
+    @CreatedBy INT
+AS
+BEGIN
+    INSERT INTO Groups (GroupName, Description, CreatedBy)
+    VALUES (@GroupName, @Description, @CreatedBy);
+END;
+GO
+
+CREATE TRIGGER trg_LogNewGroup
+ON Groups
+AFTER INSERT
+AS
+BEGIN
+    INSERT INTO GroupLogs (GroupID, Action)
+    SELECT GroupID, 'Group Created' FROM inserted;
+END;
+GO
+
+****************************************************************************************************************
+GROUP MEMBERS
+CREATE TABLE GroupMembers (
+    GroupMemberID INT PRIMARY KEY IDENTITY(1,1),
+    GroupID INT FOREIGN KEY REFERENCES Groups(GroupID),
+    UserID INT FOREIGN KEY REFERENCES Users(UserID),
+    JoinedAt DATETIME DEFAULT GETDATE()
+);
+GO
+
+CREATE TABLE GroupMemberLogs (
+    LogID INT PRIMARY KEY IDENTITY(1,1),
+    GroupID INT,
+    UserID INT,
+    Action NVARCHAR(100),
+    Timestamp DATETIME DEFAULT GETDATE()
+);
+GO
+
+CREATE PROCEDURE AddGroupMember
+    @GroupID INT,
+    @UserID INT
+AS
+BEGIN
+    INSERT INTO GroupMembers (GroupID, UserID)
+    VALUES (@GroupID, @UserID);
+END;
+GO
+
+CREATE TRIGGER trg_LogNewGroupMember
+ON GroupMembers
+AFTER INSERT
+AS
+BEGIN
+    INSERT INTO GroupMemberLogs (GroupID, UserID, Action)
+    SELECT GroupID, UserID, 'User Added to Group' FROM inserted;
+END;
+GO
+
+666
+***************************************************************************************************************
+GROUP MESSAGES:
+CREATE TABLE GroupMessages (
+    GroupMessageID INT PRIMARY KEY IDENTITY(1,1),
+    GroupID INT FOREIGN KEY REFERENCES Groups(GroupID),
+    SenderID INT FOREIGN KEY REFERENCES Users(UserID),
+    MessageText NVARCHAR(MAX) NOT NULL,
+    SentAt DATETIME DEFAULT GETDATE()
+);
+GO
+
+CREATE TABLE GroupMessageLogs (
+    LogID INT PRIMARY KEY IDENTITY(1,1),
+    GroupID INT,
+    SenderID INT,
+    Action NVARCHAR(100),
+    Timestamp DATETIME DEFAULT GETDATE()
+);
+GO
+
+CREATE PROCEDURE SendGroupMessage
+    @GroupID INT,
+    @SenderID INT,
+    @MessageText NVARCHAR(MAX)
+AS
+BEGIN
+    INSERT INTO GroupMessages (GroupID, SenderID, MessageText)
+    VALUES (@GroupID, @SenderID, @MessageText);
+END;
+GO
+
+CREATE TRIGGER trg_LogNewGroupMessage
+ON GroupMessages
+AFTER INSERT
+AS
+BEGIN
+    INSERT INTO GroupMessageLogs (GroupID, SenderID, Action)
+    SELECT GroupID, SenderID, 'Group Message Sent' FROM inserted;
+END;
+GO
+
+*******************************************************************************************************************
+
+BLOCKED USERS:
+CREATE TABLE BlockedUsers (
+    BlockID INT PRIMARY KEY IDENTITY(1,1),
+    BlockerID INT FOREIGN KEY REFERENCES Users(UserID),
+    BlockedID INT FOREIGN KEY REFERENCES Users(UserID),
+    BlockedAt DATETIME DEFAULT GETDATE()
+);
+GO
+
+CREATE TABLE BlockLogs (
+    LogID INT PRIMARY KEY IDENTITY(1,1),
+    BlockerID INT,
+    BlockedID INT,
+    Action NVARCHAR(100),
+    Timestamp DATETIME DEFAULT GETDATE()
+);
+GO
+
+CREATE PROCEDURE BlockUser
+    @BlockerID INT,
+    @BlockedID INT
+AS
+BEGIN
+    INSERT INTO BlockedUsers (BlockerID, BlockedID)
+    VALUES (@BlockerID, @BlockedID);
+END;
+GO
+
+CREATE TRIGGER trg_LogBlockedUser
+ON BlockedUsers
+AFTER INSERT
+AS
+BEGIN
+    INSERT INTO BlockLogs (BlockerID, BlockedID, Action)
+    SELECT BlockerID, BlockedID, 'User Blocked' FROM inserted;
+END;
+GO
+
+*********************************************************************************************************
+USER SETTINGS
+CREATE TABLE UserSettings (
+    SettingID INT PRIMARY KEY IDENTITY(1,1),
+    UserID INT FOREIGN KEY REFERENCES Users(UserID),
+    SettingKey NVARCHAR(50),
+    SettingValue NVARCHAR(255)
+);
+GO
+
+CREATE PROCEDURE UpdateUserSetting
+    @UserID INT,
+    @SettingKey NVARCHAR(50),
+    @SettingValue NVARCHAR(255)
+AS
+BEGIN
+    IF EXISTS (SELECT 1 FROM UserSettings WHERE UserID = @UserID AND SettingKey = @SettingKey)
+    BEGIN
+        UPDATE UserSettings
+        SET SettingValue = @SettingValue
+        WHERE UserID = @UserID AND SettingKey = @SettingKey;
+    END
+    ELSE
+    BEGIN
+        INSERT INTO UserSettings (UserID, SettingKey, SettingValue)
+        VALUES (@UserID, @SettingKey, @SettingValue);
+    END
+END;
+GO
+
+**********************************************************************************************************************
+NOTIFICATIONS :
+CREATE TABLE Notifications (
+    NotificationID INT PRIMARY KEY IDENTITY(1,1),
+    UserID INT FOREIGN KEY REFERENCES Users(UserID),
+    NotificationText NVARCHAR(255),
+    IsRead BIT DEFAULT 0,
+    CreatedAt DATETIME DEFAULT GETDATE()
+);
+GO
+
+CREATE TABLE NotificationLogs (
+    LogID INT PRIMARY KEY IDENTITY(1,1),
+    UserID INT,
+    Action NVARCHAR(100),
+    Timestamp DATETIME DEFAULT GETDATE()
+);
+GO
+
+CREATE PROCEDURE AddNotification
+    @UserID INT,
+    @NotificationText NVARCHAR(255)
+AS
+BEGIN
+    INSERT INTO Notifications (UserID, NotificationText)
+    VALUES (@UserID, @NotificationText);
+END;
+GO
+
+CREATE TRIGGER trg_LogNewNotification
+ON Notifications
+AFTER INSERT
+AS
+BEGIN
+    INSERT INTO NotificationLogs (UserID, Action)
+    SELECT UserID, 'Notification Added' FROM inserted;
+END;
+GO
+
+*******************************************************************************************************
+LOGIN LOGS
+CREATE TABLE LoginLogs (
+    LogID INT PRIMARY KEY IDENTITY(1,1),
+    UserID INT FOREIGN KEY REFERENCES Users(UserID),
+    LoginTime DATETIME DEFAULT GETDATE(),
+    IPAddress NVARCHAR(50)
+);
+GO
+
+CREATE PROCEDURE LogUserLogin
+    @UserID INT,
+    @IPAddress NVARCHAR(50)
+AS
+BEGIN
+    INSERT INTO LoginLogs (UserID, IPAddress)
+    VALUES (@UserID, @IPAddress);
+END;
+GO
+
+**********************************************************************************************************************8
+REPORTS:
+CREATE TABLE Reports (
+    ReportID INT PRIMARY KEY IDENTITY(1,1),
+    ReporterID INT FOREIGN KEY REFERENCES Users(UserID),
+    ReportedUserID INT FOREIGN KEY REFERENCES Users(UserID),
+    ReportText NVARCHAR(500),
+    CreatedAt DATETIME DEFAULT GETDATE()
+);
+GO
+
+CREATE TABLE ReportLogs (
+    LogID INT PRIMARY KEY IDENTITY(1,1),
+    ReporterID INT,
+    ReportedUserID INT,
+    Action NVARCHAR(100),
+    Timestamp DATETIME DEFAULT GETDATE()
+);
+GO
+
+CREATE PROCEDURE CreateReport
+    @ReporterID INT,
+    @ReportedUserID INT,
+    @ReportText NVARCHAR(500)
+AS
+BEGIN
+    INSERT INTO Reports (ReporterID, ReportedUserID, ReportText)
+    VALUES (@ReporterID, @ReportedUserID, @ReportText);
+END;
+GO
+
+CREATE TRIGGER trg_LogNewReport
+ON Reports
+AFTER INSERT
+AS
+BEGIN
+    INSERT INTO ReportLogs (ReporterID, ReportedUserID, Action)
+    SELECT ReporterID, ReportedUserID, 'New Report Created' FROM inserted;
+END;
+GO
+
+

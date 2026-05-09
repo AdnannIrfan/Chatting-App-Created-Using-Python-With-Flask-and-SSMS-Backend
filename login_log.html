@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Log User Login</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    body {
+      background: url('https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #fff;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0, 0, 0, 0.65);
+      z-index: -1;
+    }
+
+    .card {
+      margin-top: 80px;
+      padding: 30px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      color: #2c3e50;
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    }
+
+    h2 {
+      font-weight: bold;
+      color: #6a89cc;
+    }
+
+    .btn-submit {
+      background: #10ac84;
+      color: white;
+      font-weight: bold;
+      border-radius: 8px;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    .btn-submit:hover {
+      background: #1dd1a1;
+      transform: scale(1.02);
+      box-shadow: 0 0 15px rgba(16, 172, 132, 0.5);
+    }
+
+    .btn-home {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #6c5ce7;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+      z-index: 10;
+    }
+
+    .btn-home:hover {
+      background-color: #a29bfe;
+      text-decoration: none;
+      color: #fff;
+    }
+
+    footer {
+      width: 100%;
+      text-align: center;
+      padding: 15px 0;
+      font-size: 1.1rem;
+      color: #74b9ff;
+      font-weight: 600;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      text-shadow: 0 0 6px #81ecec;
+    }
+
+    footer span {
+      color: #00cec9;
+    }
+  </style>
+</head>
+<body>
+
+  
+  <a href="/" class="btn-home"> Return to Homepage</a>
+
+  <div class="container d-flex justify-content-center">
+    <div class="col-md-6">
+      <div class="card">
+        <h2 class="text-center mb-4">Log User Login</h2>
+
+        <form action="/login_log" method="POST" onsubmit="showPopup()">
+          <div class="mb-3">
+            <label for="user_id" class="form-label">User ID</label>
+            <input type="number" class="form-control" name="user_id" required>
+          </div>
+          <div class="mb-3">
+            <label for="ip_address" class="form-label">IP Address</label>
+            <input type="text" class="form-control" name="ip_address" required>
+          </div>
+          <button type="submit" class="btn btn-submit w-100">Log Login</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <footer>✨ Created by <span>Rabiya 😊</span> ✨</footer>
+
+  <script>
+    function showPopup() {
+      setTimeout(() => {
+        Swal.fire('Success!', 'Login logged successfully!', 'success');
+      }, 300);
+    }
+  </script>
+</body>
+</html>

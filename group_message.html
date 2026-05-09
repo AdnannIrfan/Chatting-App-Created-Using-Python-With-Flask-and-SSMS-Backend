@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Send Group Message</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    body {
+      background: url('https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      color: #f0f0f0;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: -1;
+    }
+
+    .card {
+      margin-top: 80px;
+      padding: 30px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease;
+      color: #212529;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+    }
+
+    h2 {
+      font-weight: 700;
+      color: #006d77;
+    }
+
+    textarea.form-control {
+      resize: none;
+    }
+
+    footer {
+      width: 100%;
+      text-align: center;
+      padding: 15px 0;
+      font-size: 1.1rem;
+      color: #00d1b2;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      font-weight: 600;
+      user-select: none;
+      pointer-events: none;
+      text-shadow: 0 0 5px #00a896;
+      background: transparent;
+    }
+
+    footer span {
+      color: #5eead4;
+    }
+
+    .btn-home {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      width: 180px;
+      font-weight: 600;
+      border-radius: 50px;
+      background: #00b4d8;
+      box-shadow: 0 4px 15px rgba(0, 180, 216, 0.6);
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      z-index: 10;
+    }
+
+    .btn-home:hover {
+      background-color: #0077b6;
+      box-shadow: 0 6px 25px rgba(0, 119, 182, 0.9);
+      text-decoration: none;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container d-flex justify-content-center">
+    <div class="col-md-6">
+      <div class="card">
+        <h2 class="text-center mb-4">Send Group Message</h2>
+
+        <form action="/send_group_message" method="POST" onsubmit="showPopup()">
+          <div class="mb-3">
+            <label for="group_id" class="form-label">Group ID</label>
+            <input type="number" class="form-control" name="group_id" required>
+          </div>
+          <div class="mb-3">
+            <label for="sender_id" class="form-label">Sender ID</label>
+            <input type="number" class="form-control" name="sender_id" required>
+          </div>
+          <div class="mb-3">
+            <label for="message_text" class="form-label">Message</label>
+            <textarea class="form-control" name="message_text" rows="4" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-info w-100 text-white fw-bold">Send Message</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <a href="/" class="btn btn-home text-white">Return to Home Page</a>
+
+  <footer>🌟 Created by Rabiya 🌟</footer>
+
+  <script>
+    function showPopup() {
+      setTimeout(() => {
+        Swal.fire('Success!', 'Group message sent.', 'success');
+      }, 300);
+    }
+  </script>
+</body>
+</html>

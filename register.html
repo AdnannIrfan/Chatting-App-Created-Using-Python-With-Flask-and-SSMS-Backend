@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ChatConnect | User Registration</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <style>
+    body {
+      background: url('https://img.lovepik.com/bg/20240306/3D-Rendered-Chat-App-Interface-with-a-Light-Blue-Background_3761201_wh1200.jpg') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+    }
+
+    .card {
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      background-color: rgba(255, 255, 255, 0.95);
+      animation: fadeIn 1s ease-out;
+    }
+
+    .container {
+      margin-top: 60px;
+    }
+
+    .title {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #2575fc;
+      text-align: center;
+      margin-bottom: 10px;
+      animation: slideDown 1s ease-out;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+      animation: slideDown 1.2s ease-out;
+    }
+
+    label {
+      font-weight: 500;
+    }
+
+    .btn {
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      transform: scale(1.03);
+      box-shadow: 0 0 10px rgba(37, 117, 252, 0.3);
+    }
+
+    .btn-primary {
+      background-color: #2575fc;
+      border: none;
+    }
+
+    .btn-primary:hover {
+      background-color: #1a5edb;
+    }
+
+    .left-align-btns a {
+      text-align: left !important;
+    }
+
+    .footer-note {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #2575fc;
+      text-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+      animation: fadeIn 2s ease-in-out;
+      border-top: 1px dashed #ccc;
+      padding-top: 20px;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: scale(0.95); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes slideDown {
+      0% { opacity: 0; transform: translateY(-30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+
+<div class="container d-flex justify-content-center">
+  <div class="col-lg-6 col-md-8 col-sm-10">
+    <div class="card p-5">
+
+      
+      <div class="title">💬 Welcome to ChatConnect</div>
+      <div class="subtitle">Where conversations begin and friendships grow 🌟</div>
+
+      
+      <form id="regForm" action="/register" method="POST">
+        <div class="mb-3">
+          <label for="username" class="form-label">👤 Username</label>
+          <input type="text" name="username" id="username" class="form-control" required />
+        </div>
+
+        <div class="mb-3">
+          <label for="email" class="form-label">📧 Email address</label>
+          <input type="email" name="email" id="email" class="form-control" required />
+        </div>
+
+        <div class="mb-3">
+          <label for="password" class="form-label">🔐 Password</label>
+          <input type="password" name="password" id="password" class="form-control" required minlength="6" />
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">🚀 Register Now</button>
+      </form>
+
+     
+      <div class="mt-4 left-align-btns">
+        <h6 class="text-start text-muted">Quick Access 🔗</h6>
+        <a href="/send-message" class="btn btn-secondary w-100 mt-2">📨 Send Message</a>
+        <a href="/add_friend" class="btn btn-outline-primary w-100 mt-2">➕ Add Friend</a>
+        <a href="/send_friend_request" class="btn btn-outline-success w-100 mt-2">📤 Friend Request</a>
+        <a href="/create_group" class="btn btn-outline-warning w-100 mt-2">👥 Create Group</a>
+        <a href="/add_group_member" class="btn btn-outline-info w-100 mt-2">👤 Add Member</a>
+        <a href="/send_group_message" class="btn btn-outline-primary w-100 mt-2">💬 Group Message</a>
+        <a href="/block_user" class="btn btn-outline-danger w-100 mt-2">🚫 Block User</a>
+        <a href="/user_settings" class="btn btn-outline-secondary w-100 mt-2">⚙️ Settings</a>
+        <a href="/add_notification" class="btn btn-outline-secondary w-100 mt-2">🔔 Notifications</a>
+        <a href="/login_log" class="btn btn-outline-secondary w-100 mt-2">📜 Login Logs</a>
+        <a href="/report_user" class="btn btn-outline-secondary w-100 mt-2">🛑 Report User</a>
+      </div>
+
+      
+      <div class="footer-note">
+        ✨ Created by <span style="color: #e91e63;">Rabiya 😊</span> ✨
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header bg-success text-white rounded-top-4">
+        <h5 class="modal-title" id="successModalLabel">🎉 Registration Successful!</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p class="fs-5">Welcome to <strong>ChatConnect</strong>! 🚀</p>
+        <img src="https://cdn-icons-png.flaticon.com/512/845/845646.png" alt="Success" width="100" />
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("success") === "true") {
+      const successModal = new bootstrap.Modal(document.getElementById("successModal"));
+      successModal.show();
+    }
+  });
+</script>
+
+</body>
+</html>
